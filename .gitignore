@@ -55,3 +55,10 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Source
+Agenda/
+MPQEditor/
+PythonBMP2Json/
+WC3Translator/
+.vs/
