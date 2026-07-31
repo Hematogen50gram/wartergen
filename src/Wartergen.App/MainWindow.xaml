@@ -4,48 +4,122 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Wartergen.App.ViewModels"
+        xmlns:models="clr-namespace:Wartergen.App.Models"
         mc:Ignorable="d"
-        Title="Wartergen" Height="480" Width="640">
+        Title="Wartergen" Height="560" Width="1040">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
-    <Grid Margin="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <Window.Resources>
+        <HierarchicalDataTemplate DataType="{x:Type models:JsonTreeNode}" ItemsSource="{Binding Children}">
+            <TextBlock Text="{Binding DisplayText}" />
+        </HierarchicalDataTemplate>
+        <Style TargetType="TreeViewItem">
+            <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded" />
+        </Style>
+    </Window.Resources>
+    <TabControl Margin="12">
+        <TabItem Header="Draw Terrain">
+            <Grid Margin="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
-                   VerticalAlignment="Center" Margin="0,0,8,8" />
-        <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                 Text="{Binding MapFilePath, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                Command="{Binding BrowseMapCommand}" />
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
+                           VerticalAlignment="Center" Margin="0,0,8,8" />
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                         Text="{Binding MapFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                        Command="{Binding BrowseMapCommand}" />
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain image (.bmp):"
-                   VerticalAlignment="Center" Margin="0,0,8,8" />
-        <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                 Text="{Binding BmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
-        <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                Command="{Binding BrowseBmpCommand}" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain image (.bmp):"
+                           VerticalAlignment="Center" Margin="0,0,8,8" />
+                <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                         Text="{Binding BmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                        Command="{Binding BrowseBmpCommand}" />
 
-        <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
-                HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
-                Command="{Binding DrawTerrainCommand}" />
+                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
+                        HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
+                        Command="{Binding DrawTerrainCommand}" />
 
-        <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
-                     IsIndeterminate="{Binding IsBusy}" />
+                <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
+                             IsIndeterminate="{Binding IsBusy}" />
 
-        <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
-            <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
-        </Border>
-    </Grid>
+                <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
+                    <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
+                </Border>
+            </Grid>
+        </TabItem>
+        <TabItem Header="View Terrain Data">
+            <Grid Margin="12">
+                <Grid.DataContext>
+                    <vm:TerrainDataViewModel />
+                </Grid.DataContext>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
+                           VerticalAlignment="Center" Margin="0,0,8,8" />
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                         IsReadOnly="True" Text="{Binding MapFilePath, Mode=OneWay}" />
+                <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                        Command="{Binding BrowseCommand}" />
+
+                <ProgressBar Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
+                             IsIndeterminate="{Binding IsBusy}" />
+
+                <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="6" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="All Terrain Data" FontWeight="Bold" Margin="0,0,0,4" />
+                    <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" BorderThickness="1">
+                        <TreeView x:Name="JsonTreeView" ItemsSource="{Binding RootNodes}"
+                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                  VirtualizingStackPanel.VirtualizationMode="Recycling" />
+                    </Border>
+
+                    <GridSplitter Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                  Width="6" HorizontalAlignment="Stretch" Background="LightGray" />
+
+                    <TextBlock Grid.Row="0" Grid.Column="2" Text="Meaningful Data (values differing from the majority)"
+                               FontWeight="Bold" Margin="0,0,0,4" />
+                    <Border Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1">
+                        <TreeView x:Name="MeaningfulTreeView" ItemsSource="{Binding MeaningfulNodes}"
+                                  VirtualizingStackPanel.IsVirtualizing="True"
+                                  VirtualizingStackPanel.VirtualizationMode="Recycling" />
+                    </Border>
+                </Grid>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,8,0,0"
+                           Text="{Binding StatusMessage}" Foreground="Firebrick" TextWrapping="Wrap" />
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>
