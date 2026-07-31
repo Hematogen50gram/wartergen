@@ -25,6 +25,7 @@
   <ItemGroup>
     <None Include="..\Wartergen.Wc3Terrain.Tests\TestData\terrain.json" Link="TestData\terrain.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Wartergen.Wc3Terrain.Tests\TestData\war3map.w3e" Link="TestData\war3map.w3e" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="TestData\BoundariesTest.w3e" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

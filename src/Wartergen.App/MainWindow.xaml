@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:Wartergen.App.ViewModels"
         xmlns:models="clr-namespace:Wartergen.App.Models"
         mc:Ignorable="d"
-        Title="Wartergen" Height="560" Width="1040">
+        Title="Wartergen" Height="640" Width="1040">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -17,47 +17,103 @@
         <Style TargetType="TreeViewItem">
             <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded" />
         </Style>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </Window.Resources>
     <TabControl Margin="12">
         <TabItem Header="Draw Terrain">
             <Grid Margin="12">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
-                           VerticalAlignment="Center" Margin="0,0,8,8" />
-                <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                         Text="{Binding MapFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                        Command="{Binding BrowseMapCommand}" />
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain image (.bmp):"
-                           VerticalAlignment="Center" Margin="0,0,8,8" />
-                <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                         Text="{Binding BmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                        Command="{Binding BrowseBmpCommand}" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
+                               VerticalAlignment="Center" Margin="0,0,8,8" />
+                    <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                             Text="{Binding MapFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                            Command="{Binding BrowseMapCommand}" />
 
-                <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
-                        HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
-                        Command="{Binding DrawTerrainCommand}" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain image (.bmp):"
+                               VerticalAlignment="Center" Margin="0,0,8,8" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                             Text="{Binding BmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                            Command="{Binding BrowseBmpCommand}" />
 
-                <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
-                             IsIndeterminate="{Binding IsBusy}" />
+                    <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
+                            HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
+                            Command="{Binding DrawTerrainCommand}" />
 
-                <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
-                    <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
-                </Border>
+                    <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
+                                 IsIndeterminate="{Binding IsBusy}" />
+
+                    <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
+                        <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
+                    </Border>
+                </Grid>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="BMP Preview" FontWeight="Bold" Margin="0,0,0,4" />
+
+                    <Grid Width="481" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Zoom:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <Slider Grid.Column="1" Minimum="100" Maximum="500" TickFrequency="50"
+                                VerticalAlignment="Center"
+                                Value="{Binding ZoomPercent, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0" MinWidth="40"
+                                   Text="{Binding ZoomPercent, StringFormat={}{0:0}%}" />
+                    </Grid>
+
+                    <CheckBox Content="Show crosshair" IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,4" />
+
+                    <Border Width="481" Height="481" BorderBrush="Gray" BorderThickness="1" Background="Black">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                            <Grid Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}">
+                                <Image Source="{Binding BmpPreviewSource}"
+                                       Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                                       Stretch="Fill" SnapsToDevicePixels="True"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                <Canvas Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                                        IsHitTestVisible="False">
+                                    <Rectangle Canvas.Left="{Binding BorderLeft}" Canvas.Top="{Binding BorderTop}"
+                                               Width="{Binding BorderWidth}" Height="{Binding BorderHeight}"
+                                               Stroke="Red" StrokeThickness="1" />
+                                    <Line X1="0" Y1="{Binding CrosshairY}"
+                                          X2="{Binding PreviewWidth}" Y2="{Binding CrosshairY}"
+                                          Stroke="Yellow" StrokeThickness="1"
+                                          Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
+                                    <Line X1="{Binding CrosshairX}" Y1="0"
+                                          X2="{Binding CrosshairX}" Y2="{Binding PreviewHeight}"
+                                          Stroke="Yellow" StrokeThickness="1"
+                                          Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
+                                </Canvas>
+                            </Grid>
+                        </ScrollViewer>
+                    </Border>
+                    <TextBlock Text="{Binding PreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
+                               Width="481" Margin="0,8,0,0" />
+                </StackPanel>
             </Grid>
         </TabItem>
         <TabItem Header="View Terrain Data">
