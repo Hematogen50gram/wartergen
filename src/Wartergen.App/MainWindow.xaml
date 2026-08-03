@@ -34,6 +34,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -56,14 +57,21 @@
                     <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
                             Command="{Binding BrowseBmpCommand}" />
 
-                    <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Cliff image (.png, optional):"
+                               VerticalAlignment="Center" Margin="0,0,8,8" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                             Text="{Binding CliffPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                            Command="{Binding BrowseCliffPngCommand}" />
+
+                    <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
                             HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
                             Command="{Binding DrawTerrainCommand}" />
 
-                    <ProgressBar Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
+                    <ProgressBar Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
                                  IsIndeterminate="{Binding IsBusy}" />
 
-                    <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
+                    <Border Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
                         <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
                     </Border>
                 </Grid>
@@ -85,8 +93,73 @@
                                    Text="{Binding ZoomPercent, StringFormat={}{0:0}%}" />
                     </Grid>
 
-                    <CheckBox Content="Show crosshair" IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,4" />
-					<CheckBox Content="Show playable border" IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,4" />
+                    <Grid Width="600" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Cliff opacity:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
+                                VerticalAlignment="Center"
+                                Value="{Binding CliffOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0" MinWidth="40"
+                                   Text="{Binding CliffOpacityPercent, StringFormat={}{0:0}%}" />
+                    </Grid>
+
+                    <Grid Width="600" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Top">
+                            <CheckBox Content="Show crosshair" IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,4" />
+                            <CheckBox Content="Show playable border" IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,4" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                            <TextBlock Text="Cliff color codes:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+
+                            <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
+                            <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                        <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                            <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
+                                                       Stroke="Gray" StrokeThickness="0.5"
+                                                       ToolTip="{Binding BrightHex}" />
+                                            <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,4,0,1" />
+                            <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                        <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                            <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
+                                                       Stroke="Gray" StrokeThickness="0.5"
+                                                       ToolTip="{Binding DarkHex}" />
+                                            <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
 
                     <Border Width="600" Height="600" BorderBrush="Gray" BorderThickness="1" Background="Black">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
@@ -95,6 +168,11 @@
                                        Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
                                        Stretch="Fill" SnapsToDevicePixels="True"
                                        RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                <Image Source="{Binding CliffBmpPreviewSource}"
+                                       Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                                       Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Opacity="{Binding CliffOpacityFraction}" />
                                 <Canvas Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
                                         IsHitTestVisible="False">
                                     <Rectangle Canvas.Left="{Binding BorderLeft}" Canvas.Top="{Binding BorderTop}"
@@ -115,6 +193,8 @@
                     </Border>
                     <TextBlock Text="{Binding PreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
                                Width="600" Margin="0,8,0,0" />
+                    <TextBlock Text="{Binding CliffPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
+                               Width="600" Margin="0,4,0,0" />
                 </StackPanel>
             </Grid>
         </TabItem>

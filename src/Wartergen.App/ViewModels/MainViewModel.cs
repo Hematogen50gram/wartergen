@@ -5,6 +5,7 @@ using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
+using Wartergen.App.Models;
 using Wartergen.App.Services;
 using Wartergen.Mpq;
 
@@ -24,7 +25,9 @@ public partial class MainViewModel : ObservableObject
 
     private readonly DrawTerrainWorkflow _workflow;
     private int previewRequestToken;
+    private int cliffPreviewRequestToken;
     private BitmapImage? loadedBitmap;
+    private BitmapImage? loadedCliffBitmap;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
@@ -34,12 +37,19 @@ public partial class MainViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
     private string bmpFilePath = string.Empty;
 
+    // Optional — Draw Terrain works without it (cliffs reset to flat ground level).
+    [ObservableProperty]
+    private string cliffPngFilePath = string.Empty;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
     private bool isBusy;
 
     [ObservableProperty]
     private ImageSource? bmpPreviewSource;
+
+    [ObservableProperty]
+    private ImageSource? cliffBmpPreviewSource;
 
     [ObservableProperty]
     private double previewWidth;
@@ -75,9 +85,23 @@ public partial class MainViewModel : ObservableObject
     private double zoomPercent = MinZoomPercent;
 
     [ObservableProperty]
+    private double cliffOpacityPercent = 50;
+
+    [ObservableProperty]
     private string previewError = string.Empty;
 
+    [ObservableProperty]
+    private string cliffPreviewError = string.Empty;
+
+    // WPF's Image.Opacity wants 0.0-1.0; the slider/label use 0-100 for consistency with ZoomPercent.
+    public double CliffOpacityFraction => CliffOpacityPercent / 100.0;
+
+    partial void OnCliffOpacityPercentChanged(double value) => OnPropertyChanged(nameof(CliffOpacityFraction));
+
     public ObservableCollection<string> LogEntries { get; } = new();
+
+    // Reference swatches for the cliff PNG's color encoding — constant, computed once.
+    public IReadOnlyList<CliffColorLegendEntry> CliffColorLegend { get; } = CliffColorLegendBuilder.Build();
 
     public MainViewModel()
         : this(new DrawTerrainWorkflow(MpqEditorService.CreateDefault()))
@@ -115,6 +139,19 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void BrowseCliffPng()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "PNG Images (*.png)|*.png|All files (*.*)|*.*"
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            CliffPngFilePath = dialog.FileName;
+        }
+    }
+
     private bool CanDrawTerrain() =>
         !IsBusy && !string.IsNullOrWhiteSpace(MapFilePath) && !string.IsNullOrWhiteSpace(BmpFilePath);
 
@@ -128,7 +165,8 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            await _workflow.RunAsync(MapFilePath, BmpFilePath, progress);
+            string? cliffPngPath = string.IsNullOrWhiteSpace(CliffPngFilePath) ? null : CliffPngFilePath;
+            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffPngPath, progress);
         }
         catch (Exception ex)
         {
@@ -143,6 +181,11 @@ public partial class MainViewModel : ObservableObject
     partial void OnBmpFilePathChanged(string value)
     {
         _ = RefreshBmpPreviewAsync();
+    }
+
+    partial void OnCliffPngFilePathChanged(string value)
+    {
+        _ = RefreshCliffPreviewAsync();
     }
 
     partial void OnZoomPercentChanged(double value)
@@ -195,6 +238,55 @@ public partial class MainViewModel : ObservableObject
                 loadedBitmap = null;
                 ClearPreview();
                 PreviewError = $"ERROR: {ex.Message}";
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    // Loads the chosen cliff PNG for the overlay preview only — it plays no role in layout
+    // math (the overlay is stretched to the already-computed PreviewWidth/Height), so no
+    // RecomputeLayout call is needed here.
+    public Task RefreshCliffPreviewAsync()
+    {
+        string path = CliffPngFilePath;
+        int token = ++cliffPreviewRequestToken;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            loadedCliffBitmap = null;
+            ClearCliffPreview();
+            return Task.CompletedTask;
+        }
+
+        if (!File.Exists(path))
+        {
+            loadedCliffBitmap = null;
+            ClearCliffPreview();
+            CliffPreviewError = $"ERROR: Cliff PNG file not found: {path}";
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            BitmapImage bitmap = LoadFrozenBitmap(path);
+
+            if (token != cliffPreviewRequestToken)
+            {
+                return Task.CompletedTask; // superseded by a newer cliff PNG selection
+            }
+
+            loadedCliffBitmap = bitmap;
+            CliffBmpPreviewSource = bitmap;
+            CliffPreviewError = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            if (token == cliffPreviewRequestToken)
+            {
+                loadedCliffBitmap = null;
+                ClearCliffPreview();
+                CliffPreviewError = $"ERROR: {ex.Message}";
             }
         }
 
@@ -262,5 +354,11 @@ public partial class MainViewModel : ObservableObject
         CrosshairX = 0;
         CrosshairY = 0;
         PreviewError = string.Empty;
+    }
+
+    private void ClearCliffPreview()
+    {
+        CliffBmpPreviewSource = null;
+        CliffPreviewError = string.Empty;
     }
 }
