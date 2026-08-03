@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <None Include="..\..\MPQEditor\MPQEditor.exe" Link="MPQEditor\MPQEditor.exe" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\..\samples\BoundariesTest.w3x" Link="samples\BoundariesTest.w3x" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

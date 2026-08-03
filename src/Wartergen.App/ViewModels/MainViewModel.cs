@@ -5,7 +5,6 @@ using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using Wartergen.App.Models;
 using Wartergen.App.Services;
 using Wartergen.Mpq;
 
@@ -17,11 +16,15 @@ public partial class MainViewModel : ObservableObject
     private const double MinZoomPercent = 100;
     private const double MaxZoomPercent = 500;
 
+    // Playable-area border thickness, in BMP pixels, on each side. Constant for any map size.
+    private const double PlayableAreaLeftInset = 7;
+    private const double PlayableAreaTopInset = 9;
+    private const double PlayableAreaRightInset = 7;
+    private const double PlayableAreaBottomInset = 5;
+
     private readonly DrawTerrainWorkflow _workflow;
-    private readonly PlayableAreaTemplateProvider _templateProvider;
     private int previewRequestToken;
     private BitmapImage? loadedBitmap;
-    private PlayableAreaTemplate? loadedTemplate;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
@@ -77,19 +80,13 @@ public partial class MainViewModel : ObservableObject
     public ObservableCollection<string> LogEntries { get; } = new();
 
     public MainViewModel()
-        : this(new DrawTerrainWorkflow(MpqEditorService.CreateDefault()), PlayableAreaTemplateProvider.CreateDefault())
+        : this(new DrawTerrainWorkflow(MpqEditorService.CreateDefault()))
     {
     }
 
     public MainViewModel(DrawTerrainWorkflow workflow)
-        : this(workflow, PlayableAreaTemplateProvider.CreateDefault())
-    {
-    }
-
-    public MainViewModel(DrawTerrainWorkflow workflow, PlayableAreaTemplateProvider templateProvider)
     {
         _workflow = workflow;
-        _templateProvider = templateProvider;
     }
 
     [RelayCommand]
@@ -153,12 +150,11 @@ public partial class MainViewModel : ObservableObject
         RecomputeLayout();
     }
 
-    // Loads the chosen BMP and the reference playable-area template (derived once from
-    // samples/BoundariesTest.w3x, cached thereafter), caching both so zoom changes afterward
-    // only need to recompute layout, not reload anything.
+    // Loads the chosen BMP, caching it so zoom changes afterward only need to recompute layout,
+    // not reload the file.
     // Public (rather than only fired as a side effect of the property setter) so it can be awaited
     // directly in tests instead of racing the fire-and-forget call above.
-    public async Task RefreshBmpPreviewAsync()
+    public Task RefreshBmpPreviewAsync()
     {
         string path = BmpFilePath;
         int token = ++previewRequestToken;
@@ -166,32 +162,28 @@ public partial class MainViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(path))
         {
             loadedBitmap = null;
-            loadedTemplate = null;
             ClearPreview();
-            return;
+            return Task.CompletedTask;
         }
 
         if (!File.Exists(path))
         {
             loadedBitmap = null;
-            loadedTemplate = null;
             ClearPreview();
             PreviewError = $"ERROR: BMP file not found: {path}";
-            return;
+            return Task.CompletedTask;
         }
 
         try
         {
             BitmapImage bitmap = LoadFrozenBitmap(path);
-            PlayableAreaTemplate template = await _templateProvider.GetAsync();
 
             if (token != previewRequestToken)
             {
-                return; // superseded by a newer BMP selection
+                return Task.CompletedTask; // superseded by a newer BMP selection
             }
 
             loadedBitmap = bitmap;
-            loadedTemplate = template;
             BmpPreviewSource = bitmap;
             PreviewError = string.Empty;
             RecomputeLayout();
@@ -201,20 +193,20 @@ public partial class MainViewModel : ObservableObject
             if (token == previewRequestToken)
             {
                 loadedBitmap = null;
-                loadedTemplate = null;
                 ClearPreview();
                 PreviewError = $"ERROR: {ex.Message}";
             }
         }
+
+        return Task.CompletedTask;
     }
 
     // Recomputes every size-dependent preview value (display dimensions, border rectangle,
-    // crosshair position) from the cached bitmap/template plus the current zoom level. Called
-    // after a new BMP loads and again whenever the user changes zoom, without re-decoding the
-    // image or re-fetching the template.
+    // crosshair position) from the cached bitmap plus the current zoom level. Called after a
+    // new BMP loads and again whenever the user changes zoom, without re-decoding the image.
     private void RecomputeLayout()
     {
-        if (loadedBitmap is null || loadedTemplate is null)
+        if (loadedBitmap is null)
         {
             return;
         }
@@ -229,11 +221,10 @@ public partial class MainViewModel : ObservableObject
         PreviewWidth = nativeWidth * totalScale;
         PreviewHeight = nativeHeight * totalScale;
 
-        PlayableAreaTemplate template = loadedTemplate;
-        double left = template.LeftInset;
-        double top = template.TopInset;
-        double right = Math.Max(left, nativeWidth - template.RightInset);
-        double bottom = Math.Max(top, nativeHeight - template.BottomInset);
+        double left = PlayableAreaLeftInset;
+        double top = PlayableAreaTopInset;
+        double right = Math.Max(left, nativeWidth - PlayableAreaRightInset);
+        double bottom = Math.Max(top, nativeHeight - PlayableAreaBottomInset);
 
         BorderLeft = left * totalScale;
         BorderTop = top * totalScale;
