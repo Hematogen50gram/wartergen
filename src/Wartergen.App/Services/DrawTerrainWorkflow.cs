@@ -17,7 +17,7 @@ public sealed class DrawTerrainWorkflow
         _mpqEditorService = mpqEditorService;
     }
 
-    public async Task RunAsync(string mapPath, string bmpPath, string? cliffPngPath, IProgress<string> log, CancellationToken cancellationToken = default)
+    public async Task RunAsync(string mapPath, string bmpPath, string? cliffPngPath, string? waterPngPath, IProgress<string> log, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(mapPath))
         {
@@ -30,6 +30,10 @@ public sealed class DrawTerrainWorkflow
         if (cliffPngPath is not null && !File.Exists(cliffPngPath))
         {
             throw new DrawTerrainWorkflowException($"Cliff PNG file not found: {cliffPngPath}");
+        }
+        if (waterPngPath is not null && !File.Exists(waterPngPath))
+        {
+            throw new DrawTerrainWorkflowException($"Water PNG file not found: {waterPngPath}");
         }
 
         string tempDir = Path.Combine(Path.GetTempPath(), "Wartergen", Guid.NewGuid().ToString("N"));
@@ -87,19 +91,14 @@ public sealed class DrawTerrainWorkflow
             }
 
             log.Report(cliffPngPath is null
-                ? "No cliff image provided — resetting cliffs to flat ground level..."
+                ? "No cliff image provided — leaving cliffs unchanged..."
                 : "Applying cliff PNG colors to cliff texture/layer height...");
             try
             {
-                if (cliffPngPath is null)
+                if (cliffPngPath is not null)
                 {
-                    CliffPngConverter.ApplyFlatDefault(terrain.CliffTexture, terrain.LayerHeight);
-                }
-                else
-                {
-                    RgbaColor[] pixels = CliffPngConverter.ReadPixelsTopLeftFirst(cliffPngPath);
-                    (int[] cliffTexture, int[] layerHeight) = CliffPngConverter.BuildConvertedCliffData(pixels);
-                    CliffPngConverter.Apply(terrain.CliffTexture, terrain.LayerHeight, cliffTexture, layerHeight);
+                    RgbaColor[] pixels = PngPixelReader.ReadPixelsTopLeftFirst(cliffPngPath);
+                    CliffPngConverter.Apply(terrain.CliffTexture, terrain.LayerHeight, pixels);
 
                     log.Report($"Applied cliff PNG ({pixels.Length} pixels).");
                 }
@@ -107,6 +106,24 @@ public sealed class DrawTerrainWorkflow
             catch (Exception ex)
             {
                 throw new DrawTerrainWorkflowException($"Step 4 (apply cliff PNG): {ex.Message}", ex);
+            }
+
+            log.Report(waterPngPath is null
+                ? "No water image provided — leaving water unchanged..."
+                : "Applying water PNG colors to water height...");
+            try
+            {
+                if (waterPngPath is not null)
+                {
+                    RgbaColor[] pixels = PngPixelReader.ReadPixelsTopLeftFirst(waterPngPath);
+                    WaterPngConverter.Apply(terrain.WaterHeight, terrain.Flags, pixels);
+
+                    log.Report($"Applied water PNG ({pixels.Length} pixels).");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DrawTerrainWorkflowException($"Step 5 (apply water PNG): {ex.Message}", ex);
             }
 
             log.Report($"Converting terrain.json back to {TerrainFileName}...");
@@ -117,7 +134,7 @@ public sealed class DrawTerrainWorkflow
             }
             catch (Exception ex)
             {
-                throw new DrawTerrainWorkflowException($"Step 5 (convert terrain.json to {TerrainFileName}): {ex.Message}", ex);
+                throw new DrawTerrainWorkflowException($"Step 6 (convert terrain.json to {TerrainFileName}): {ex.Message}", ex);
             }
 
             log.Report($"Repacking {TerrainFileName} into the map...");
@@ -127,7 +144,7 @@ public sealed class DrawTerrainWorkflow
             }
             catch (Exception ex)
             {
-                throw new DrawTerrainWorkflowException($"Step 6 (repack {TerrainFileName}): {ex.Message}", ex);
+                throw new DrawTerrainWorkflowException($"Step 7 (repack {TerrainFileName}): {ex.Message}", ex);
             }
 
             log.Report("Done.");

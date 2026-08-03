@@ -26,8 +26,10 @@ public partial class MainViewModel : ObservableObject
     private readonly DrawTerrainWorkflow _workflow;
     private int previewRequestToken;
     private int cliffPreviewRequestToken;
+    private int waterPreviewRequestToken;
     private BitmapImage? loadedBitmap;
     private BitmapImage? loadedCliffBitmap;
+    private BitmapImage? loadedWaterBitmap;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
@@ -41,6 +43,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string cliffPngFilePath = string.Empty;
 
+    // Optional — Draw Terrain works without it (water resets to no water).
+    [ObservableProperty]
+    private string waterPngFilePath = string.Empty;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
     private bool isBusy;
@@ -50,6 +56,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private ImageSource? cliffBmpPreviewSource;
+
+    [ObservableProperty]
+    private ImageSource? waterBmpPreviewSource;
 
     [ObservableProperty]
     private double previewWidth;
@@ -88,15 +97,23 @@ public partial class MainViewModel : ObservableObject
     private double cliffOpacityPercent = 50;
 
     [ObservableProperty]
+    private double waterOpacityPercent = 50;
+
+    [ObservableProperty]
     private string previewError = string.Empty;
 
     [ObservableProperty]
     private string cliffPreviewError = string.Empty;
 
+    [ObservableProperty]
+    private string waterPreviewError = string.Empty;
+
     // WPF's Image.Opacity wants 0.0-1.0; the slider/label use 0-100 for consistency with ZoomPercent.
     public double CliffOpacityFraction => CliffOpacityPercent / 100.0;
+    public double WaterOpacityFraction => WaterOpacityPercent / 100.0;
 
     partial void OnCliffOpacityPercentChanged(double value) => OnPropertyChanged(nameof(CliffOpacityFraction));
+    partial void OnWaterOpacityPercentChanged(double value) => OnPropertyChanged(nameof(WaterOpacityFraction));
 
     public ObservableCollection<string> LogEntries { get; } = new();
 
@@ -152,6 +169,19 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void BrowseWaterPng()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "PNG Images (*.png)|*.png|All files (*.*)|*.*"
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            WaterPngFilePath = dialog.FileName;
+        }
+    }
+
     private bool CanDrawTerrain() =>
         !IsBusy && !string.IsNullOrWhiteSpace(MapFilePath) && !string.IsNullOrWhiteSpace(BmpFilePath);
 
@@ -166,7 +196,8 @@ public partial class MainViewModel : ObservableObject
         try
         {
             string? cliffPngPath = string.IsNullOrWhiteSpace(CliffPngFilePath) ? null : CliffPngFilePath;
-            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffPngPath, progress);
+            string? waterPngPath = string.IsNullOrWhiteSpace(WaterPngFilePath) ? null : WaterPngFilePath;
+            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffPngPath, waterPngPath, progress);
         }
         catch (Exception ex)
         {
@@ -186,6 +217,11 @@ public partial class MainViewModel : ObservableObject
     partial void OnCliffPngFilePathChanged(string value)
     {
         _ = RefreshCliffPreviewAsync();
+    }
+
+    partial void OnWaterPngFilePathChanged(string value)
+    {
+        _ = RefreshWaterPreviewAsync();
     }
 
     partial void OnZoomPercentChanged(double value)
@@ -293,6 +329,54 @@ public partial class MainViewModel : ObservableObject
         return Task.CompletedTask;
     }
 
+    // Loads the chosen water PNG for the overlay preview only — same shape as
+    // RefreshCliffPreviewAsync, no RecomputeLayout involvement.
+    public Task RefreshWaterPreviewAsync()
+    {
+        string path = WaterPngFilePath;
+        int token = ++waterPreviewRequestToken;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            loadedWaterBitmap = null;
+            ClearWaterPreview();
+            return Task.CompletedTask;
+        }
+
+        if (!File.Exists(path))
+        {
+            loadedWaterBitmap = null;
+            ClearWaterPreview();
+            WaterPreviewError = $"ERROR: Water PNG file not found: {path}";
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            BitmapImage bitmap = LoadFrozenBitmap(path);
+
+            if (token != waterPreviewRequestToken)
+            {
+                return Task.CompletedTask; // superseded by a newer water PNG selection
+            }
+
+            loadedWaterBitmap = bitmap;
+            WaterBmpPreviewSource = bitmap;
+            WaterPreviewError = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            if (token == waterPreviewRequestToken)
+            {
+                loadedWaterBitmap = null;
+                ClearWaterPreview();
+                WaterPreviewError = $"ERROR: {ex.Message}";
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
     // Recomputes every size-dependent preview value (display dimensions, border rectangle,
     // crosshair position) from the cached bitmap plus the current zoom level. Called after a
     // new BMP loads and again whenever the user changes zoom, without re-decoding the image.
@@ -360,5 +444,11 @@ public partial class MainViewModel : ObservableObject
     {
         CliffBmpPreviewSource = null;
         CliffPreviewError = string.Empty;
+    }
+
+    private void ClearWaterPreview()
+    {
+        WaterBmpPreviewSource = null;
+        WaterPreviewError = string.Empty;
     }
 }
