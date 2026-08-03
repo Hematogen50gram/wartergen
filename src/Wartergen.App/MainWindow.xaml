@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:Wartergen.App.ViewModels"
         xmlns:models="clr-namespace:Wartergen.App.Models"
         mc:Ignorable="d"
-        Title="Wartergen" Height="640" Width="1040">
+        Title="Wartergen" Height="800" Width="1110">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -71,7 +71,7 @@
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="BMP Preview" FontWeight="Bold" Margin="0,0,0,4" />
 
-                    <Grid Width="481" Margin="0,0,0,4">
+                    <Grid Width="600" Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -86,8 +86,9 @@
                     </Grid>
 
                     <CheckBox Content="Show crosshair" IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,4" />
+					<CheckBox Content="Show playable border" IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,4" />
 
-                    <Border Width="481" Height="481" BorderBrush="Gray" BorderThickness="1" Background="Black">
+                    <Border Width="600" Height="600" BorderBrush="Gray" BorderThickness="1" Background="Black">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                             <Grid Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}">
                                 <Image Source="{Binding BmpPreviewSource}"
@@ -98,21 +99,22 @@
                                         IsHitTestVisible="False">
                                     <Rectangle Canvas.Left="{Binding BorderLeft}" Canvas.Top="{Binding BorderTop}"
                                                Width="{Binding BorderWidth}" Height="{Binding BorderHeight}"
-                                               Stroke="Red" StrokeThickness="1" />
+                                               Stroke="Red" StrokeThickness="1"
+											   Visibility="{Binding ShowPlayableBorder, Converter={StaticResource BoolToVisibility}}"/>
                                     <Line X1="0" Y1="{Binding CrosshairY}"
                                           X2="{Binding PreviewWidth}" Y2="{Binding CrosshairY}"
                                           Stroke="Yellow" StrokeThickness="1"
                                           Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
                                     <Line X1="{Binding CrosshairX}" Y1="0"
                                           X2="{Binding CrosshairX}" Y2="{Binding PreviewHeight}"
-                                          Stroke="Yellow" StrokeThickness="1"
+                                          Stroke="Yellow" StrokeThickness="2"
                                           Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
                                 </Canvas>
                             </Grid>
                         </ScrollViewer>
                     </Border>
                     <TextBlock Text="{Binding PreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
-                               Width="481" Margin="0,8,0,0" />
+                               Width="600" Margin="0,8,0,0" />
                 </StackPanel>
             </Grid>
         </TabItem>

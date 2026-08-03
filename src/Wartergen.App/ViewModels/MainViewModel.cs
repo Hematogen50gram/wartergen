@@ -66,6 +66,9 @@ public partial class MainViewModel : ObservableObject
     private bool showCrosshair = true;
 
     [ObservableProperty]
+    private bool showPlayableBorder = true;
+
+    [ObservableProperty]
     private double zoomPercent = MinZoomPercent;
 
     [ObservableProperty]
