@@ -22,4 +22,9 @@
     <ProjectReference Include="..\..\src\Wartergen.Bmp\Wartergen.Bmp.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="TestData\cliffdebug.png" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="TestData\cliffalgorithm.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

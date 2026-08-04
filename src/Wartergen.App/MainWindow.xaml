@@ -58,12 +58,12 @@
                     <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
                             Command="{Binding BrowseBmpCommand}" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Cliff image (.png, optional):"
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Cliff image (.bmp, optional):"
                                VerticalAlignment="Center" Margin="0,0,8,8" />
                     <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                             Text="{Binding CliffPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                             Text="{Binding CliffBmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
                     <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                            Command="{Binding BrowseCliffPngCommand}" />
+                            Command="{Binding BrowseCliffBmpCommand}" />
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Water image (.png, optional):"
                                VerticalAlignment="Center" Margin="0,0,8,8" />

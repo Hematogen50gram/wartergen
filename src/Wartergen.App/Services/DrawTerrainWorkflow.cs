@@ -17,7 +17,7 @@ public sealed class DrawTerrainWorkflow
         _mpqEditorService = mpqEditorService;
     }
 
-    public async Task RunAsync(string mapPath, string bmpPath, string? cliffPngPath, string? waterPngPath, IProgress<string> log, CancellationToken cancellationToken = default)
+    public async Task RunAsync(string mapPath, string bmpPath, string? cliffBmpPath, string? waterPngPath, IProgress<string> log, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(mapPath))
         {
@@ -27,9 +27,9 @@ public sealed class DrawTerrainWorkflow
         {
             throw new DrawTerrainWorkflowException($"BMP file not found: {bmpPath}");
         }
-        if (cliffPngPath is not null && !File.Exists(cliffPngPath))
+        if (cliffBmpPath is not null && !File.Exists(cliffBmpPath))
         {
-            throw new DrawTerrainWorkflowException($"Cliff PNG file not found: {cliffPngPath}");
+            throw new DrawTerrainWorkflowException($"Cliff BMP file not found: {cliffBmpPath}");
         }
         if (waterPngPath is not null && !File.Exists(waterPngPath))
         {
@@ -90,22 +90,24 @@ public sealed class DrawTerrainWorkflow
                 throw new DrawTerrainWorkflowException($"Step 3 (apply BMP to ground texture): {ex.Message}", ex);
             }
 
-            log.Report(cliffPngPath is null
+            log.Report(cliffBmpPath is null
                 ? "No cliff image provided — leaving cliffs unchanged..."
-                : "Applying cliff PNG colors to cliff texture/layer height...");
+                : "Applying cliff BMP colors to cliff texture/layer height...");
             try
             {
-                if (cliffPngPath is not null)
+                if (cliffBmpPath is not null)
                 {
-                    RgbaColor[] pixels = PngPixelReader.ReadPixelsTopLeftFirst(cliffPngPath);
-                    CliffPngConverter.Apply(terrain.CliffTexture, terrain.LayerHeight, pixels);
+                    RgbColor[] pixels = BmpGroundTextureConverter.ReadPixelsTopLeftFirst(cliffBmpPath);
+                    // Corner arrays are (width+1) x (height+1) per tile-cell grid (see
+                    // TerrainTranslator's rowSize = Map.Width + 1), not Map.Width itself.
+                    CliffBmpConverter.Apply(terrain.CliffTexture, terrain.LayerHeight, pixels, terrain.Map.Width + 1);
 
-                    log.Report($"Applied cliff PNG ({pixels.Length} pixels).");
+                    log.Report($"Applied cliff BMP ({pixels.Length} pixels).");
                 }
             }
             catch (Exception ex)
             {
-                throw new DrawTerrainWorkflowException($"Step 4 (apply cliff PNG): {ex.Message}", ex);
+                throw new DrawTerrainWorkflowException($"Step 4 (apply cliff BMP): {ex.Message}", ex);
             }
 
             log.Report(waterPngPath is null

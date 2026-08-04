@@ -41,7 +41,7 @@ public partial class MainViewModel : ObservableObject
 
     // Optional — Draw Terrain works without it (cliffs reset to flat ground level).
     [ObservableProperty]
-    private string cliffPngFilePath = string.Empty;
+    private string cliffBmpFilePath = string.Empty;
 
     // Optional — Draw Terrain works without it (water resets to no water).
     [ObservableProperty]
@@ -157,15 +157,15 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void BrowseCliffPng()
+    private void BrowseCliffBmp()
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "PNG Images (*.png)|*.png|All files (*.*)|*.*"
+            Filter = "Bitmap Images (*.bmp)|*.bmp|All files (*.*)|*.*"
         };
         if (dialog.ShowDialog() == true)
         {
-            CliffPngFilePath = dialog.FileName;
+            CliffBmpFilePath = dialog.FileName;
         }
     }
 
@@ -195,9 +195,9 @@ public partial class MainViewModel : ObservableObject
 
         try
         {
-            string? cliffPngPath = string.IsNullOrWhiteSpace(CliffPngFilePath) ? null : CliffPngFilePath;
+            string? cliffBmpPath = string.IsNullOrWhiteSpace(CliffBmpFilePath) ? null : CliffBmpFilePath;
             string? waterPngPath = string.IsNullOrWhiteSpace(WaterPngFilePath) ? null : WaterPngFilePath;
-            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffPngPath, waterPngPath, progress);
+            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffBmpPath, waterPngPath, progress);
         }
         catch (Exception ex)
         {
@@ -214,7 +214,7 @@ public partial class MainViewModel : ObservableObject
         _ = RefreshBmpPreviewAsync();
     }
 
-    partial void OnCliffPngFilePathChanged(string value)
+    partial void OnCliffBmpFilePathChanged(string value)
     {
         _ = RefreshCliffPreviewAsync();
     }
@@ -280,12 +280,12 @@ public partial class MainViewModel : ObservableObject
         return Task.CompletedTask;
     }
 
-    // Loads the chosen cliff PNG for the overlay preview only — it plays no role in layout
+    // Loads the chosen cliff BMP for the overlay preview only — it plays no role in layout
     // math (the overlay is stretched to the already-computed PreviewWidth/Height), so no
     // RecomputeLayout call is needed here.
     public Task RefreshCliffPreviewAsync()
     {
-        string path = CliffPngFilePath;
+        string path = CliffBmpFilePath;
         int token = ++cliffPreviewRequestToken;
 
         if (string.IsNullOrWhiteSpace(path))
@@ -299,7 +299,7 @@ public partial class MainViewModel : ObservableObject
         {
             loadedCliffBitmap = null;
             ClearCliffPreview();
-            CliffPreviewError = $"ERROR: Cliff PNG file not found: {path}";
+            CliffPreviewError = $"ERROR: Cliff BMP file not found: {path}";
             return Task.CompletedTask;
         }
 
@@ -309,7 +309,7 @@ public partial class MainViewModel : ObservableObject
 
             if (token != cliffPreviewRequestToken)
             {
-                return Task.CompletedTask; // superseded by a newer cliff PNG selection
+                return Task.CompletedTask; // superseded by a newer cliff BMP selection
             }
 
             loadedCliffBitmap = bitmap;
