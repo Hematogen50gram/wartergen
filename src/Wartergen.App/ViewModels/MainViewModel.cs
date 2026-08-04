@@ -27,9 +27,11 @@ public partial class MainViewModel : ObservableObject
     private int previewRequestToken;
     private int cliffPreviewRequestToken;
     private int waterPreviewRequestToken;
+    private int heightsPreviewRequestToken;
     private BitmapImage? loadedBitmap;
     private BitmapImage? loadedCliffBitmap;
     private BitmapImage? loadedWaterBitmap;
+    private BitmapImage? loadedHeightsBitmap;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
@@ -47,6 +49,10 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string waterPngFilePath = string.Empty;
 
+    // Optional — Draw Terrain works without it (heights left unchanged).
+    [ObservableProperty]
+    private string heightsPngFilePath = string.Empty;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(DrawTerrainCommand))]
     private bool isBusy;
@@ -59,6 +65,9 @@ public partial class MainViewModel : ObservableObject
 
     [ObservableProperty]
     private ImageSource? waterBmpPreviewSource;
+
+    [ObservableProperty]
+    private ImageSource? heightsBmpPreviewSource;
 
     [ObservableProperty]
     private double previewWidth;
@@ -100,6 +109,9 @@ public partial class MainViewModel : ObservableObject
     private double waterOpacityPercent = 50;
 
     [ObservableProperty]
+    private double heightsOpacityPercent = 50;
+
+    [ObservableProperty]
     private string previewError = string.Empty;
 
     [ObservableProperty]
@@ -108,17 +120,25 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string waterPreviewError = string.Empty;
 
+    [ObservableProperty]
+    private string heightsPreviewError = string.Empty;
+
     // WPF's Image.Opacity wants 0.0-1.0; the slider/label use 0-100 for consistency with ZoomPercent.
     public double CliffOpacityFraction => CliffOpacityPercent / 100.0;
     public double WaterOpacityFraction => WaterOpacityPercent / 100.0;
+    public double HeightsOpacityFraction => HeightsOpacityPercent / 100.0;
 
     partial void OnCliffOpacityPercentChanged(double value) => OnPropertyChanged(nameof(CliffOpacityFraction));
     partial void OnWaterOpacityPercentChanged(double value) => OnPropertyChanged(nameof(WaterOpacityFraction));
+    partial void OnHeightsOpacityPercentChanged(double value) => OnPropertyChanged(nameof(HeightsOpacityFraction));
 
     public ObservableCollection<string> LogEntries { get; } = new();
 
     // Reference swatches for the cliff PNG's color encoding — constant, computed once.
     public IReadOnlyList<CliffColorLegendEntry> CliffColorLegend { get; } = CliffColorLegendBuilder.Build();
+
+    // Reference swatches for the heights PNG's grayscale-to-height encoding — constant, computed once.
+    public IReadOnlyList<HeightsColorLegendEntry> HeightsColorLegend { get; } = HeightsColorLegendBuilder.Build();
 
     public MainViewModel()
         : this(new DrawTerrainWorkflow(MpqEditorService.CreateDefault()))
@@ -182,6 +202,19 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
+    private void BrowseHeightsPng()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "PNG Images (*.png)|*.png|All files (*.*)|*.*"
+        };
+        if (dialog.ShowDialog() == true)
+        {
+            HeightsPngFilePath = dialog.FileName;
+        }
+    }
+
     private bool CanDrawTerrain() =>
         !IsBusy && !string.IsNullOrWhiteSpace(MapFilePath) && !string.IsNullOrWhiteSpace(BmpFilePath);
 
@@ -197,7 +230,8 @@ public partial class MainViewModel : ObservableObject
         {
             string? cliffBmpPath = string.IsNullOrWhiteSpace(CliffBmpFilePath) ? null : CliffBmpFilePath;
             string? waterPngPath = string.IsNullOrWhiteSpace(WaterPngFilePath) ? null : WaterPngFilePath;
-            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffBmpPath, waterPngPath, progress);
+            string? heightsPngPath = string.IsNullOrWhiteSpace(HeightsPngFilePath) ? null : HeightsPngFilePath;
+            await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffBmpPath, waterPngPath, heightsPngPath, progress);
         }
         catch (Exception ex)
         {
@@ -222,6 +256,11 @@ public partial class MainViewModel : ObservableObject
     partial void OnWaterPngFilePathChanged(string value)
     {
         _ = RefreshWaterPreviewAsync();
+    }
+
+    partial void OnHeightsPngFilePathChanged(string value)
+    {
+        _ = RefreshHeightsPreviewAsync();
     }
 
     partial void OnZoomPercentChanged(double value)
@@ -377,6 +416,54 @@ public partial class MainViewModel : ObservableObject
         return Task.CompletedTask;
     }
 
+    // Loads the chosen heights PNG for the overlay preview only — same shape as
+    // RefreshCliffPreviewAsync/RefreshWaterPreviewAsync, no RecomputeLayout involvement.
+    public Task RefreshHeightsPreviewAsync()
+    {
+        string path = HeightsPngFilePath;
+        int token = ++heightsPreviewRequestToken;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            loadedHeightsBitmap = null;
+            ClearHeightsPreview();
+            return Task.CompletedTask;
+        }
+
+        if (!File.Exists(path))
+        {
+            loadedHeightsBitmap = null;
+            ClearHeightsPreview();
+            HeightsPreviewError = $"ERROR: Heights PNG file not found: {path}";
+            return Task.CompletedTask;
+        }
+
+        try
+        {
+            BitmapImage bitmap = LoadFrozenBitmap(path);
+
+            if (token != heightsPreviewRequestToken)
+            {
+                return Task.CompletedTask; // superseded by a newer heights PNG selection
+            }
+
+            loadedHeightsBitmap = bitmap;
+            HeightsBmpPreviewSource = bitmap;
+            HeightsPreviewError = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            if (token == heightsPreviewRequestToken)
+            {
+                loadedHeightsBitmap = null;
+                ClearHeightsPreview();
+                HeightsPreviewError = $"ERROR: {ex.Message}";
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+
     // Recomputes every size-dependent preview value (display dimensions, border rectangle,
     // crosshair position) from the cached bitmap plus the current zoom level. Called after a
     // new BMP loads and again whenever the user changes zoom, without re-decoding the image.
@@ -450,5 +537,11 @@ public partial class MainViewModel : ObservableObject
     {
         WaterBmpPreviewSource = null;
         WaterPreviewError = string.Empty;
+    }
+
+    private void ClearHeightsPreview()
+    {
+        HeightsBmpPreviewSource = null;
+        HeightsPreviewError = string.Empty;
     }
 }

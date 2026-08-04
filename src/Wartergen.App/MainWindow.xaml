@@ -36,6 +36,7 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
@@ -72,14 +73,21 @@
                     <Button Grid.Row="3" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
                             Command="{Binding BrowseWaterPngCommand}" />
 
-                    <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Heights image (.png, optional):"
+                               VerticalAlignment="Center" Margin="0,0,8,8" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+                             Text="{Binding HeightsPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button Grid.Row="4" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
+                            Command="{Binding BrowseHeightsPngCommand}" />
+
+                    <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
                             HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
                             Command="{Binding DrawTerrainCommand}" />
 
-                    <ProgressBar Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
+                    <ProgressBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
                                  IsIndeterminate="{Binding IsBusy}" />
 
-                    <Border Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
+                    <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
                         <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
                     </Border>
                 </Grid>
@@ -133,11 +141,44 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Heights opacity:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
+                                VerticalAlignment="Center"
+                                Value="{Binding HeightsOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0" MinWidth="40"
+                                   Text="{Binding HeightsOpacityPercent, StringFormat={}{0:0}%}" />
+                    </Grid>
+
+                    <Grid Width="600" Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" VerticalAlignment="Top">
                             <CheckBox Content="Show crosshair" IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,4" />
                             <CheckBox Content="Show playable border" IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,4" />
+
+                            <TextBlock Text="Heights color reference:" FontSize="10" FontWeight="Bold" Margin="0,8,0,2" />
+                            <ItemsControl ItemsSource="{Binding HeightsColorLegend}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type models:HeightsColorLegendEntry}">
+                                        <StackPanel Margin="0,0,10,0" HorizontalAlignment="Center">
+                                            <Rectangle Width="24" Height="14" Fill="{Binding Brush}"
+                                                       Stroke="Gray" StrokeThickness="0.5" ToolTip="{Binding Hex}" />
+                                            <TextBlock Text="{Binding Label}" FontSize="8" HorizontalAlignment="Center" />
+                                            <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Margin="12,0,0,0">
@@ -200,6 +241,11 @@
                                        Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
                                        RenderOptions.BitmapScalingMode="NearestNeighbor"
                                        Opacity="{Binding WaterOpacityFraction}" />
+                                <Image Source="{Binding HeightsBmpPreviewSource}"
+                                       Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                                       Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                       Opacity="{Binding HeightsOpacityFraction}" />
                                 <Canvas Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
                                         IsHitTestVisible="False">
                                     <Rectangle Canvas.Left="{Binding BorderLeft}" Canvas.Top="{Binding BorderTop}"
@@ -223,6 +269,8 @@
                     <TextBlock Text="{Binding CliffPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
                                Width="600" Margin="0,4,0,0" />
                     <TextBlock Text="{Binding WaterPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
+                               Width="600" Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding HeightsPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
                                Width="600" Margin="0,4,0,0" />
                 </StackPanel>
             </Grid>

@@ -17,7 +17,7 @@ public sealed class DrawTerrainWorkflow
         _mpqEditorService = mpqEditorService;
     }
 
-    public async Task RunAsync(string mapPath, string bmpPath, string? cliffBmpPath, string? waterPngPath, IProgress<string> log, CancellationToken cancellationToken = default)
+    public async Task RunAsync(string mapPath, string bmpPath, string? cliffBmpPath, string? waterPngPath, string? heightsPngPath, IProgress<string> log, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(mapPath))
         {
@@ -34,6 +34,10 @@ public sealed class DrawTerrainWorkflow
         if (waterPngPath is not null && !File.Exists(waterPngPath))
         {
             throw new DrawTerrainWorkflowException($"Water PNG file not found: {waterPngPath}");
+        }
+        if (heightsPngPath is not null && !File.Exists(heightsPngPath))
+        {
+            throw new DrawTerrainWorkflowException($"Heights PNG file not found: {heightsPngPath}");
         }
 
         string tempDir = Path.Combine(Path.GetTempPath(), "Wartergen", Guid.NewGuid().ToString("N"));
@@ -128,6 +132,24 @@ public sealed class DrawTerrainWorkflow
                 throw new DrawTerrainWorkflowException($"Step 5 (apply water PNG): {ex.Message}", ex);
             }
 
+            log.Report(heightsPngPath is null
+                ? "No heights image provided — leaving ground heights unchanged..."
+                : "Applying heights PNG to ground height...");
+            try
+            {
+                if (heightsPngPath is not null)
+                {
+                    RgbaColor[] pixels = PngPixelReader.ReadPixelsTopLeftFirst(heightsPngPath);
+                    HeightsPngConverter.Apply(terrain.GroundHeight, pixels);
+
+                    log.Report($"Applied heights PNG ({pixels.Length} pixels).");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DrawTerrainWorkflowException($"Step 6 (apply heights PNG): {ex.Message}", ex);
+            }
+
             log.Report($"Converting terrain.json back to {TerrainFileName}...");
             try
             {
@@ -136,7 +158,7 @@ public sealed class DrawTerrainWorkflow
             }
             catch (Exception ex)
             {
-                throw new DrawTerrainWorkflowException($"Step 6 (convert terrain.json to {TerrainFileName}): {ex.Message}", ex);
+                throw new DrawTerrainWorkflowException($"Step 7 (convert terrain.json to {TerrainFileName}): {ex.Message}", ex);
             }
 
             log.Report($"Repacking {TerrainFileName} into the map...");
@@ -146,7 +168,7 @@ public sealed class DrawTerrainWorkflow
             }
             catch (Exception ex)
             {
-                throw new DrawTerrainWorkflowException($"Step 7 (repack {TerrainFileName}): {ex.Message}", ex);
+                throw new DrawTerrainWorkflowException($"Step 8 (repack {TerrainFileName}): {ex.Message}", ex);
             }
 
             log.Report("Done.");
