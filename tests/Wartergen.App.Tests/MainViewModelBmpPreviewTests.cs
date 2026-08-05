@@ -213,6 +213,21 @@ public class MainViewModelBmpPreviewTests
     }
 
     [Fact]
+    public void CliffOpacityFraction_ZeroWhenCliffDisabled()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.CliffOpacityPercent = 80;
+        viewModel.CliffEnabled = false;
+
+        Assert.Equal(0.0, viewModel.CliffOpacityFraction);
+
+        viewModel.CliffEnabled = true;
+
+        Assert.Equal(0.8, viewModel.CliffOpacityFraction);
+    }
+
+    [Fact]
     public async Task RefreshCliffPreviewAsync_LoadsPng()
     {
         var viewModel = CreateViewModel();
@@ -286,6 +301,21 @@ public class MainViewModelBmpPreviewTests
     }
 
     [Fact]
+    public void WaterOpacityFraction_ZeroWhenWaterDisabled()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.WaterOpacityPercent = 80;
+        viewModel.WaterEnabled = false;
+
+        Assert.Equal(0.0, viewModel.WaterOpacityFraction);
+
+        viewModel.WaterEnabled = true;
+
+        Assert.Equal(0.8, viewModel.WaterOpacityFraction);
+    }
+
+    [Fact]
     public async Task RefreshWaterPreviewAsync_LoadsPng()
     {
         var viewModel = CreateViewModel();
@@ -356,6 +386,21 @@ public class MainViewModelBmpPreviewTests
         viewModel.HeightsOpacityPercent = 25;
 
         Assert.Equal(0.25, viewModel.HeightsOpacityFraction);
+    }
+
+    [Fact]
+    public void HeightsOpacityFraction_ZeroWhenHeightsDisabled()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.HeightsOpacityPercent = 80;
+        viewModel.HeightsEnabled = false;
+
+        Assert.Equal(0.0, viewModel.HeightsOpacityFraction);
+
+        viewModel.HeightsEnabled = true;
+
+        Assert.Equal(0.8, viewModel.HeightsOpacityFraction);
     }
 
     [Fact]

@@ -24,7 +24,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\MPQEditor\MPQEditor.exe" Link="MPQEditor\MPQEditor.exe" CopyToOutputDirectory="PreserveNewest" />
+    <!-- ExcludeFromSingleFile keeps this as a loose file next to the exe on publish,
+         instead of getting bundled/extracted-to-temp, since MpqEditorService launches
+         it as a subprocess relative to AppContext.BaseDirectory. -->
+    <None Include="..\..\MPQEditor\MPQEditor.exe" Link="MPQEditor\MPQEditor.exe" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
+
+  <!-- DebugType=none in the publish profile only suppresses this project's own .pdb;
+       referenced projects' .pdb files still land in the publish output because pubxml
+       properties don't flow through ProjectReferences. Strip them here instead. -->
+  <Target Name="RemovePdbsFromPublishDir" AfterTargets="Publish">
+    <ItemGroup>
+      <PdbToRemove Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(PdbToRemove)" />
+  </Target>
 
 </Project>

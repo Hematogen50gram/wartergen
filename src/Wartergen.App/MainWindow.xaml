@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:Wartergen.App.ViewModels"
         xmlns:models="clr-namespace:Wartergen.App.Models"
         mc:Ignorable="d"
-        Title="Wartergen" Height="800" Width="1110">
+        Title="Wartergen" Height="800" Width="1250">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -23,9 +23,9 @@
         <TabItem Header="Draw Terrain">
             <Grid Margin="12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="12" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Column="0">
@@ -37,11 +37,10 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" MinWidth="360" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
@@ -80,22 +79,22 @@
                     <Button Grid.Row="4" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
                             Command="{Binding BrowseHeightsPngCommand}" />
 
-                    <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Content="Draw Terrain"
-                            HorizontalAlignment="Left" MinWidth="140" Padding="8,6" Margin="0,4,0,8"
-                            Command="{Binding DrawTerrainCommand}" />
+                    <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal"
+                                HorizontalAlignment="Left" Margin="0,4,0,8">
+                        <Button Content="Draw Terrain" MinWidth="140" Padding="8,6"
+                                Command="{Binding DrawTerrainCommand}" />
+                        <TextBlock Text="{Binding DrawTerrainStatusMessage}" Foreground="{Binding DrawTerrainStatusBrush}"
+                                   VerticalAlignment="Center" FontWeight="Bold" Margin="12,0,0,0" />
+                    </StackPanel>
 
                     <ProgressBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
                                  IsIndeterminate="{Binding IsBusy}" />
-
-                    <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" BorderBrush="Gray" BorderThickness="1">
-                        <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
-                    </Border>
                 </Grid>
 
                 <StackPanel Grid.Column="2">
                     <TextBlock Text="BMP Preview" FontWeight="Bold" Margin="0,0,0,4" />
 
-                    <Grid Width="600" Margin="0,0,0,4">
+                    <Grid Width="320" Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -109,119 +108,133 @@
                                    Text="{Binding ZoomPercent, StringFormat={}{0:0}%}" />
                     </Grid>
 
-                    <Grid Width="600" Margin="0,0,0,4">
+                    <Grid Width="320" Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Cliff opacity:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <CheckBox Grid.Column="0" Content="Cliff opacity:" VerticalAlignment="Center" Margin="0,0,6,0"
+                                  IsChecked="{Binding CliffEnabled}" />
                         <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
-                                VerticalAlignment="Center"
+                                VerticalAlignment="Center" IsEnabled="{Binding CliffEnabled}"
                                 Value="{Binding CliffOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0" MinWidth="40"
                                    Text="{Binding CliffOpacityPercent, StringFormat={}{0:0}%}" />
                     </Grid>
 
-                    <Grid Width="600" Margin="0,0,0,4">
+                    <Grid Width="320" Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Water opacity:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <CheckBox Grid.Column="0" Content="Water opacity:" VerticalAlignment="Center" Margin="0,0,6,0"
+                                  IsChecked="{Binding WaterEnabled}" />
                         <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
-                                VerticalAlignment="Center"
+                                VerticalAlignment="Center" IsEnabled="{Binding WaterEnabled}"
                                 Value="{Binding WaterOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0" MinWidth="40"
                                    Text="{Binding WaterOpacityPercent, StringFormat={}{0:0}%}" />
                     </Grid>
 
-                    <Grid Width="600" Margin="0,0,0,4">
+                    <Grid Width="320" Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="Heights opacity:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <CheckBox Grid.Column="0" Content="Heights opacity:" VerticalAlignment="Center" Margin="0,0,6,0"
+                                  IsChecked="{Binding HeightsEnabled}" />
                         <Slider Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
-                                VerticalAlignment="Center"
+                                VerticalAlignment="Center" IsEnabled="{Binding HeightsEnabled}"
                                 Value="{Binding HeightsOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0" MinWidth="40"
                                    Text="{Binding HeightsOpacityPercent, StringFormat={}{0:0}%}" />
                     </Grid>
 
-                    <Grid Width="600" Margin="0,0,0,4">
+                    <Grid Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0" VerticalAlignment="Top">
+                        <StackPanel Grid.Column="0" VerticalAlignment="Top" Margin="0,0,16,0">
                             <CheckBox Content="Show crosshair" IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,4" />
                             <CheckBox Content="Show playable border" IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,4" />
-
-                            <TextBlock Text="Heights color reference:" FontSize="10" FontWeight="Bold" Margin="0,8,0,2" />
-                            <ItemsControl ItemsSource="{Binding HeightsColorLegend}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type models:HeightsColorLegendEntry}">
-                                        <StackPanel Margin="0,0,10,0" HorizontalAlignment="Center">
-                                            <Rectangle Width="24" Height="14" Fill="{Binding Brush}"
-                                                       Stroke="Gray" StrokeThickness="0.5" ToolTip="{Binding Hex}" />
-                                            <TextBlock Text="{Binding Label}" FontSize="8" HorizontalAlignment="Center" />
-                                            <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                            <TextBlock Text="Cliff color codes:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+                        <GroupBox Grid.Column="1" Header="Color Legends" Padding="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
-                            <ItemsControl ItemsSource="{Binding CliffColorLegend}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
-                                        <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
-                                            <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
-                                                       Stroke="Gray" StrokeThickness="0.5"
-                                                       ToolTip="{Binding BrightHex}" />
-                                            <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Heights color reference:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+                                    <ItemsControl ItemsSource="{Binding HeightsColorLegend}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type models:HeightsColorLegendEntry}">
+                                                <StackPanel Margin="0,0,10,0" HorizontalAlignment="Center">
+                                                    <Rectangle Width="24" Height="14" Fill="{Binding Brush}"
+                                                               Stroke="Gray" StrokeThickness="0.5" ToolTip="{Binding Hex}" />
+                                                    <TextBlock Text="{Binding Label}" FontSize="8" HorizontalAlignment="Center" />
+                                                    <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
 
-                            <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,4,0,1" />
-                            <ItemsControl ItemsSource="{Binding CliffColorLegend}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
-                                        <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
-                                            <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
-                                                       Stroke="Gray" StrokeThickness="0.5"
-                                                       ToolTip="{Binding DarkHex}" />
-                                            <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock Text="Cliff color codes:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+
+                                    <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
+                                    <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                                <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                                    <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
+                                                               Stroke="Gray" StrokeThickness="0.5"
+                                                               ToolTip="{Binding BrightHex}" />
+                                                    <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,4,0,1" />
+                                    <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                                <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                                    <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
+                                                               Stroke="Gray" StrokeThickness="0.5"
+                                                               ToolTip="{Binding DarkHex}" />
+                                                    <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
                     </Grid>
 
                     <Border Width="600" Height="600" BorderBrush="Gray" BorderThickness="1" Background="Black">
@@ -264,15 +277,34 @@
                             </Grid>
                         </ScrollViewer>
                     </Border>
-                    <TextBlock Text="{Binding PreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
-                               Width="600" Margin="0,8,0,0" />
-                    <TextBlock Text="{Binding CliffPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
-                               Width="600" Margin="0,4,0,0" />
-                    <TextBlock Text="{Binding WaterPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
-                               Width="600" Margin="0,4,0,0" />
-                    <TextBlock Text="{Binding HeightsPreviewError}" Foreground="Firebrick" TextWrapping="Wrap"
-                               Width="600" Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding PreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                               Margin="0,8,0,0" />
+                    <TextBlock Text="{Binding CliffPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding WaterPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding HeightsPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                               Margin="0,4,0,0" />
                 </StackPanel>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Log">
+            <Grid Margin="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Output Log" FontWeight="Bold" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="Clear" Padding="8,2" Command="{Binding ClearLogCommand}" />
+                </Grid>
+                <Border Grid.Row="1" BorderBrush="Gray" BorderThickness="1">
+                    <ListBox x:Name="LogListBox" ItemsSource="{Binding LogEntries}" />
+                </Border>
             </Grid>
         </TabItem>
         <TabItem Header="View Terrain Data">
