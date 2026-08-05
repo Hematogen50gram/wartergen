@@ -19,5 +19,6 @@ Dependencies:
 MPQ editor(bundled)
 
 External tools:
+
 This project uses source code of https://github.com/ChiefOfGxBxL/WC3MapTranslator tools ported to C#.
 MPQ editor by Ladzislav Zezula http://www.zezula.net/en/mpq/main.html bundled for your convenience.
