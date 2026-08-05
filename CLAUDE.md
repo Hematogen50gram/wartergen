@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Wartergen is a Windows desktop (WPF) app that automates a Warcraft III map terrain-editing workflow. It merges what used to be three separate manual tools (an MPQ archive editor, the `wc3maptranslator` JS library, and a BMP→JSON script) into a single "Draw Terrain" action: extract `war3map.w3e` from a `.w3x`/`.w3m` map, convert it to JSON, overwrite the ground texture using colors read from a `.bmp` image, convert back to binary, and repack it into the map.
 
+The main window is a `TabControl` with two tabs: "Draw Terrain" (the workflow above) and "View Terrain Data", a read-only terrain-JSON tree viewer for inspecting a map's `war3map.w3e` without modifying it.
+
 ## Commands
 
 - Build: `dotnet build Wartergen.sln`
@@ -18,7 +20,7 @@ Wartergen is a Windows desktop (WPF) app that automates a Warcraft III map terra
 
 `Wartergen.sln` has four src projects plus one xUnit test project per src project:
 
-- `src/Wartergen.App` (net9.0-windows) — WPF UI, MVVM via CommunityToolkit.Mvvm. `MainViewModel` drives `DrawTerrainWorkflow`.
+- `src/Wartergen.App` (net9.0-windows) — WPF UI, MVVM via CommunityToolkit.Mvvm. `MainViewModel` drives `DrawTerrainWorkflow`; `TerrainDataViewModel` drives the "View Terrain Data" tab.
 - `src/Wartergen.Wc3Terrain` (net9.0, platform-independent) — binary `war3map.w3e` ⇄ `TerrainModel` JSON translator (`TerrainTranslator`, `LittleEndianReader`/`Writer`).
 - `src/Wartergen.Bmp` (net9.0-windows, `System.Drawing.Common`) — reads BMP pixels and converts them into ground-texture indices (`BmpGroundTextureConverter`).
 - `src/Wartergen.Mpq` (net9.0-windows) — wraps the external `MPQEditor.exe` process (`MpqEditorService`). Argument-list construction is isolated in `MpqCommandArgs`, kept separate from process invocation so it's directly testable.
@@ -30,6 +32,11 @@ The pipeline lives in `DrawTerrainWorkflow` (`src/Wartergen.App/Services/DrawTer
 3. Overwrite `TerrainModel.GroundTexture` via `BmpGroundTextureConverter`: pixels are read row-major, top-left first; each unique color gets a sequential index in first-appearance order; the texture array is overwritten positionally.
 4. Serialize back to bytes via `TerrainTranslator.JsonToWar`.
 5. Repack into the map via `IMpqEditorService.AddOrReplaceFileAsync`.
+
+The "View Terrain Data" tab uses `TerrainJsonLoader` (`src/Wartergen.App/Services/TerrainJsonLoader.cs`), which reuses steps 1–2 of the pipeline above (extract `war3map.w3e`, translate via `TerrainTranslator.WarToJson`) but stops there — no BMP step, no repack, and the temp directory is deleted immediately after. The resulting `TerrainModel` is serialized to a `JsonDocument` and rendered as two side-by-side trees, both built from `src/Wartergen.App/Models/`:
+
+- `JsonTreeBuilder` — the full 1:1 tree. Nodes are lazy (`JsonTreeNode.EnsureChildrenLoaded()` only materializes children when a `TreeViewItem` is expanded, wired up via `MainWindow.xaml.cs`'s `TreeViewItem_Expanded`), and any object/array with more than `DirectChildThreshold` (100) children is split into `Group` nodes of `ChunkSize` (500) via the shared `JsonTreeGrouping` helper — this matters because the per-tile arrays (`groundHeight`, `groundTexture`, etc.) can have tens of thousands of elements.
+- `MeaningfulDataTreeBuilder` — a filtered second view of the same document: for each scalar array, it computes the majority ("mode") value and keeps only the elements that differ from it (labeled by original index), so a mostly-uniform 4000-element array collapses to just the handful of tiles that were actually painted differently. Arrays of objects/nested structures (no well-defined majority) fall back to `JsonTreeBuilder`'s full representation.
 
 Important: `Wartergen.Wc3Terrain` and `Wartergen.Bmp` are from-scratch C# ports, not wrappers. The app has no runtime dependency on Node or Python. `WC3Translator/` (a vendored copy of the `wc3maptranslator` npm package) and `PythonBMP2Json/bmp_to_wc3_terrain.py` exist only as behavioral references the C# code was ported from — don't shell out to them or treat them as live dependencies.
 
