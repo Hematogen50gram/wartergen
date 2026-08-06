@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:Wartergen.App.ViewModels"
         xmlns:models="clr-namespace:Wartergen.App.Models"
         mc:Ignorable="d"
-        Title="Wartergen" Height="950" Width="1150">
+        Title="Wartergen" Height="850" Width="1200" MinWidth="1200" MinHeight="850">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -46,260 +46,267 @@
     <TabControl Margin="12">
         <TabItem Header="Draw Terrain">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-            <Grid Margin="12">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="12" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0">
+                <Grid Margin="12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" MinWidth="595.04" />
-                        <ColumnDefinition Width="12" />
-                        <ColumnDefinition Width="Auto" MinWidth="320" />
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="12" MinWidth="12"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <GroupBox Grid.Column="0" Header="Map &amp; Images" Padding="8" VerticalAlignment="Top">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" MinWidth="360" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
-                                       VerticalAlignment="Center" Margin="0,0,8,8" />
-                            <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                                     Text="{Binding MapFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Grid.Row="0" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                                    Command="{Binding BrowseMapCommand}" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain image (.bmp):"
-                                       VerticalAlignment="Center" Margin="0,0,8,8" />
-                            <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                                     Text="{Binding BmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Grid.Row="1" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                                    Command="{Binding BrowseBmpCommand}" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Cliff image (.bmp, optional):"
-                                       VerticalAlignment="Center" Margin="0,0,8,8" />
-                            <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                                     Text="{Binding CliffBmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Grid.Row="2" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                                    Command="{Binding BrowseCliffBmpCommand}" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Water image (.png, optional):"
-                                       VerticalAlignment="Center" Margin="0,0,8,8" />
-                            <TextBox Grid.Row="3" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                                     Text="{Binding WaterPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Grid.Row="3" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                                    Command="{Binding BrowseWaterPngCommand}" />
-
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Heights image (.png, optional):"
-                                       VerticalAlignment="Center" Margin="0,0,8,8" />
-                            <TextBox Grid.Row="4" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
-                                     Text="{Binding HeightsPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                            <Button Grid.Row="4" Grid.Column="2" Content="Browse..." Padding="8,2" Margin="0,0,0,8"
-                                    Command="{Binding BrowseHeightsPngCommand}" />
-
-                            <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal"
-                                        HorizontalAlignment="Left" Margin="0,4,0,8">
-                                <Button Content="Draw Terrain" MinWidth="140" Padding="8,6"
-                                        Command="{Binding DrawTerrainCommand}" />
-                                <TextBlock Text="{Binding DrawTerrainStatusMessage}" Foreground="{Binding DrawTerrainStatusBrush}"
-                                           VerticalAlignment="Center" FontWeight="Bold" Margin="12,0,0,0" />
-                            </StackPanel>
-
-                            <ProgressBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
-                                         IsIndeterminate="{Binding IsBusy}" />
-                        </Grid>
-                    </GroupBox>
-
-                    <GroupBox Grid.Column="2" Header="View Settings" Padding="8" VerticalAlignment="Top">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" MinWidth="140" />
-                                <ColumnDefinition Width="180" />
-                                <ColumnDefinition Width="Auto" MinWidth="45" />
-                            </Grid.ColumnDefinitions>
-
-                            <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Content="Show crosshair"
-                                      IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,10" />
-
-                            <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Show playable border"
-                                      IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,10" />
-
-                            <CheckBox Grid.Row="2" Grid.Column="0" Content="Cliff opacity:" VerticalAlignment="Center"
-                                      Margin="0,0,6,10" IsChecked="{Binding CliffEnabled}" />
-                            <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
-                                    VerticalAlignment="Center" Margin="0,0,0,10" IsEnabled="{Binding CliffEnabled}"
-                                    Value="{Binding CliffOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,10"
-                                       Text="{Binding CliffOpacityPercent, StringFormat={}{0:0}%}" />
-
-                            <CheckBox Grid.Row="3" Grid.Column="0" Content="Water opacity:" VerticalAlignment="Center"
-                                      Margin="0,0,6,10" IsChecked="{Binding WaterEnabled}" />
-                            <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
-                                    VerticalAlignment="Center" Margin="0,0,0,10" IsEnabled="{Binding WaterEnabled}"
-                                    Value="{Binding WaterOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,10"
-                                       Text="{Binding WaterOpacityPercent, StringFormat={}{0:0}%}" />
-
-                            <CheckBox Grid.Row="4" Grid.Column="0" Content="Heights opacity:" VerticalAlignment="Center"
-                                      Margin="0,0,6,10" IsChecked="{Binding HeightsEnabled}" />
-                            <Slider Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
-                                    VerticalAlignment="Center" Margin="0,0,0,10" IsEnabled="{Binding HeightsEnabled}"
-                                    Value="{Binding HeightsOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,10"
-                                       Text="{Binding HeightsOpacityPercent, StringFormat={}{0:0}%}" />
-
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Zoom:" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <Slider Grid.Row="5" Grid.Column="1" Minimum="100" Maximum="500" TickFrequency="50"
-                                    VerticalAlignment="Center" Margin="0,0,0,0"
-                                    Value="{Binding ZoomPercent, UpdateSourceTrigger=PropertyChanged}" />
-                            <TextBlock Grid.Row="5" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0"
-                                       Text="{Binding ZoomPercent, StringFormat={}{0:0}%}" />
-                        </Grid>
-                    </GroupBox>
-                </Grid>
-
-                <GroupBox Grid.Row="2" Header="Preview" Padding="8" HorizontalAlignment="Left">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <Grid Grid.Column="0" VerticalAlignment="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"  />
+                            <ColumnDefinition Width="12" MinWidth="12" />
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <GroupBox Grid.Row="0" Header="Preview" Padding="4" HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="300" Height="700">
                             <StackPanel>
-                                <TextBlock Text="Heights color reference:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
-                                <ItemsControl ItemsSource="{Binding HeightsColorLegend}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type models:HeightsColorLegendEntry}">
-                                            <StackPanel Margin="0,0,10,0" HorizontalAlignment="Center">
-                                                <Rectangle Width="24" Height="14" Fill="{Binding Brush}"
-                                                           Stroke="Gray" StrokeThickness="0.5" ToolTip="{Binding Hex}" />
-                                                <TextBlock Text="{Binding Label}" FontSize="8" HorizontalAlignment="Center" />
-                                                <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                    <StackPanel>
+                                        <TextBlock Text="Heights color reference:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+                                        <ItemsControl ItemsSource="{Binding HeightsColorLegend}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type models:HeightsColorLegendEntry}">
+                                                    <StackPanel Margin="0,0,10,0" HorizontalAlignment="Center">
+                                                        <Rectangle Width="24" Height="14" Fill="{Binding Brush}"
+                                           Stroke="Gray" StrokeThickness="0.5" ToolTip="{Binding Hex}" />
+                                                        <TextBlock Text="{Binding Label}" FontSize="8" HorizontalAlignment="Center" />
+                                                        <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+
+                                    <StackPanel Margin="24,0,0,0">
+                                        <TextBlock Text="Cliff color codes:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+
+                                        <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
+                                        <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                                    <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                                        <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
+                                           Stroke="Gray" StrokeThickness="0.5"
+                                           ToolTip="{Binding BrightHex}" />
+                                                        <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+
+                                        <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,4,0,1" />
+                                        <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                                    <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                                        <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
+                                           Stroke="Gray" StrokeThickness="0.5"
+                                           ToolTip="{Binding DarkHex}" />
+                                                        <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Border  Width="700" Height="700" MinWidth="700" MinHeight="700" BorderBrush="Gray" BorderThickness="1" Background="Black">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                        <Grid Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}">
+                                            <Image Source="{Binding BmpPreviewSource}"
+                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                           Stretch="Fill" SnapsToDevicePixels="True"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                            <Image Source="{Binding CliffBmpPreviewSource}"
+                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                           Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Opacity="{Binding CliffOpacityFraction}" />
+                                            <Image Source="{Binding WaterBmpPreviewSource}"
+                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                           Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Opacity="{Binding WaterOpacityFraction}" />
+                                            <Image Source="{Binding HeightsBmpPreviewSource}"
+                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                           Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
+                           RenderOptions.BitmapScalingMode="NearestNeighbor"
+                           Opacity="{Binding HeightsOpacityFraction}" />
+                                            <Canvas Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
+                            IsHitTestVisible="False">
+                                                <Rectangle Canvas.Left="{Binding BorderLeft}" Canvas.Top="{Binding BorderTop}"
+                                   Width="{Binding BorderWidth}" Height="{Binding BorderHeight}"
+                                   Stroke="Red" StrokeThickness="1"
+                                   Visibility="{Binding ShowPlayableBorder, Converter={StaticResource BoolToVisibility}}"/>
+                                                <Line X1="0" Y1="{Binding CrosshairY}"
+                              X2="{Binding PreviewWidth}" Y2="{Binding CrosshairY}"
+                              Stroke="Yellow" StrokeThickness="1"
+                              Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
+                                                <Line X1="{Binding CrosshairX}" Y1="0"
+                              X2="{Binding CrosshairX}" Y2="{Binding PreviewHeight}"
+                              Stroke="Yellow" StrokeThickness="2"
+                              Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
+                                            </Canvas>
+                                        </Grid>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <TextBlock Text="{Binding PreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                   Margin="0,8,0,0" />
+                                <TextBlock Text="{Binding CliffPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                   Margin="0,4,0,0" />
+                                <TextBlock Text="{Binding WaterPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                   Margin="0,4,0,0" />
+                                <TextBlock Text="{Binding HeightsPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                   Margin="0,4,0,0" />
                             </StackPanel>
+                        </GroupBox>
+                    </Grid>
 
-                            <StackPanel Margin="24,0,0,0">
-                                <TextBlock Text="Cliff color codes:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
+                    <Grid Grid.Column="1" Grid.ColumnSpan="2" Width="500" HorizontalAlignment="Left">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                                <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
-                                <ItemsControl ItemsSource="{Binding CliffColorLegend}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
-                                            <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
-                                                <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
-                                                           Stroke="Gray" StrokeThickness="0.5"
-                                                           ToolTip="{Binding BrightHex}" />
-                                                <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                        <GroupBox Header="Map &amp; Images" Padding="8" VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="400" MaxWidth="400">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,4,0,1" />
-                                <ItemsControl ItemsSource="{Binding CliffColorLegend}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
-                                            <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
-                                                <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
-                                                           Stroke="Gray" StrokeThickness="0.5"
-                                                           ToolTip="{Binding DarkHex}" />
-                                                <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </StackPanel>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Map file (.w3x/.w3m):"
+   VerticalAlignment="Center" Margin="0,0,8,8" />
+                                <TextBox Grid.Row="0" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+ Text="{Binding MapFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Row="0" Grid.Column="2" Content="..." Padding="8,2" Margin="0,0,0,8"
+Command="{Binding BrowseMapCommand}" />
 
-                        <Border Width="600" Height="600" BorderBrush="Gray" BorderThickness="1" Background="Black">
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                                <Grid Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}">
-                                    <Image Source="{Binding BmpPreviewSource}"
-                                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
-                                           Stretch="Fill" SnapsToDevicePixels="True"
-                                           RenderOptions.BitmapScalingMode="NearestNeighbor" />
-                                    <Image Source="{Binding CliffBmpPreviewSource}"
-                                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
-                                           Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
-                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                           Opacity="{Binding CliffOpacityFraction}" />
-                                    <Image Source="{Binding WaterBmpPreviewSource}"
-                                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
-                                           Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
-                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                           Opacity="{Binding WaterOpacityFraction}" />
-                                    <Image Source="{Binding HeightsBmpPreviewSource}"
-                                           Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
-                                           Stretch="Fill" SnapsToDevicePixels="True" IsHitTestVisible="False"
-                                           RenderOptions.BitmapScalingMode="NearestNeighbor"
-                                           Opacity="{Binding HeightsOpacityFraction}" />
-                                    <Canvas Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
-                                            IsHitTestVisible="False">
-                                        <Rectangle Canvas.Left="{Binding BorderLeft}" Canvas.Top="{Binding BorderTop}"
-                                                   Width="{Binding BorderWidth}" Height="{Binding BorderHeight}"
-                                                   Stroke="Red" StrokeThickness="1"
-                                                   Visibility="{Binding ShowPlayableBorder, Converter={StaticResource BoolToVisibility}}"/>
-                                        <Line X1="0" Y1="{Binding CrosshairY}"
-                                              X2="{Binding PreviewWidth}" Y2="{Binding CrosshairY}"
-                                              Stroke="Yellow" StrokeThickness="1"
-                                              Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
-                                        <Line X1="{Binding CrosshairX}" Y1="0"
-                                              X2="{Binding CrosshairX}" Y2="{Binding PreviewHeight}"
-                                              Stroke="Yellow" StrokeThickness="2"
-                                              Visibility="{Binding ShowCrosshair, Converter={StaticResource BoolToVisibility}}" />
-                                    </Canvas>
-                                </Grid>
-                            </ScrollViewer>
-                        </Border>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Terrain image (.bmp):"
+   VerticalAlignment="Center" Margin="0,0,8,8" />
+                                <TextBox Grid.Row="1" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+ Text="{Binding BmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Row="1" Grid.Column="2" Content="..." Padding="8,2" Margin="0,0,0,8"
+Command="{Binding BrowseBmpCommand}" />
 
-                        <TextBlock Text="{Binding PreviewError}" Foreground="Tomato" TextWrapping="Wrap"
-                                   Margin="0,8,0,0" />
-                        <TextBlock Text="{Binding CliffPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
-                                   Margin="0,4,0,0" />
-                        <TextBlock Text="{Binding WaterPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
-                                   Margin="0,4,0,0" />
-                        <TextBlock Text="{Binding HeightsPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
-                                   Margin="0,4,0,0" />
-                    </StackPanel>
-                </GroupBox>
-            </Grid>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Cliff image (.bmp):"
+   VerticalAlignment="Center" Margin="0,0,8,8" />
+                                <TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+ Text="{Binding CliffBmpFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Row="2" Grid.Column="2" Content="..." Padding="8,2" Margin="0,0,0,8"
+Command="{Binding BrowseCliffBmpCommand}" />
+
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Water image (.png):"
+   VerticalAlignment="Center" Margin="0,0,8,8" />
+                                <TextBox Grid.Row="3" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+ Text="{Binding WaterPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Row="3" Grid.Column="2" Content="..." Padding="8,2" Margin="0,0,0,8"
+Command="{Binding BrowseWaterPngCommand}" />
+
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Heights image (.png):"
+   VerticalAlignment="Center" Margin="0,0,8,8" />
+                                <TextBox Grid.Row="4" Grid.Column="1" Margin="0,0,8,8" VerticalContentAlignment="Center"
+ Text="{Binding HeightsPngFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Grid.Row="4" Grid.Column="2" Content="..." Padding="8,2" Margin="0,0,0,8"
+Command="{Binding BrowseHeightsPngCommand}" />
+
+                                <StackPanel Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal"
+    HorizontalAlignment="Left" Margin="0,4,0,8">
+                                    <Button Content="Draw Terrain" MinWidth="140" Padding="8,6"
+    Command="{Binding DrawTerrainCommand}" />
+                                    <TextBlock Text="{Binding DrawTerrainStatusMessage}" Foreground="{Binding DrawTerrainStatusBrush}"
+       VerticalAlignment="Center" FontWeight="Bold" Margin="12,0,0,0" />
+                                </StackPanel>
+
+                                <ProgressBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" Height="6" Margin="0,0,0,8"
+     IsIndeterminate="{Binding IsBusy}" />
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Grid.Row="1" Header="View Settings" Padding="8" VerticalAlignment="Top" HorizontalAlignment="Left" MinWidth="400" MaxWidth="400">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" MinWidth="140" />
+                                    <ColumnDefinition Width="100" />
+                                    <ColumnDefinition Width="Auto" MinWidth="40" />
+                                </Grid.ColumnDefinitions>
+
+                                <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Content="Show crosshair"
+  IsChecked="{Binding ShowCrosshair}" Margin="0,0,0,10" />
+
+                                <CheckBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Content="Show playable border"
+  IsChecked="{Binding ShowPlayableBorder}" Margin="0,0,0,10" />
+
+                                <CheckBox Grid.Row="2" Grid.Column="0" Content="Cliff opacity:" VerticalAlignment="Center"
+  Margin="0,0,6,10" IsChecked="{Binding CliffEnabled}" />
+                                <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
+VerticalAlignment="Center" Margin="0,0,0,10" IsEnabled="{Binding CliffEnabled}"
+Value="{Binding CliffOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,10"
+   Text="{Binding CliffOpacityPercent, StringFormat={}{0:0}%}" />
+
+                                <CheckBox Grid.Row="3" Grid.Column="0" Content="Water opacity:" VerticalAlignment="Center"
+  Margin="0,0,6,10" IsChecked="{Binding WaterEnabled}" />
+                                <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
+VerticalAlignment="Center" Margin="0,0,0,10" IsEnabled="{Binding WaterEnabled}"
+Value="{Binding WaterOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="3" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,10"
+   Text="{Binding WaterOpacityPercent, StringFormat={}{0:0}%}" />
+
+                                <CheckBox Grid.Row="4" Grid.Column="0" Content="Heights opacity:" VerticalAlignment="Center"
+  Margin="0,0,6,10" IsChecked="{Binding HeightsEnabled}" />
+                                <Slider Grid.Row="4" Grid.Column="1" Minimum="0" Maximum="100" TickFrequency="10"
+VerticalAlignment="Center" Margin="0,0,0,10" IsEnabled="{Binding HeightsEnabled}"
+Value="{Binding HeightsOpacityPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="4" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,10"
+   Text="{Binding HeightsOpacityPercent, StringFormat={}{0:0}%}" />
+
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Zoom:" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <Slider Grid.Row="5" Grid.Column="1" Minimum="100" Maximum="500" TickFrequency="50"
+VerticalAlignment="Center" Margin="0,0,0,0"
+Value="{Binding ZoomPercent, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBlock Grid.Row="5" Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0"
+   Text="{Binding ZoomPercent, StringFormat={}{0:0}%}" />
+                            </Grid>
+                        </GroupBox>
+                    </Grid>
+
+                </Grid>
             </ScrollViewer>
         </TabItem>
         <TabItem Header="View Terrain Data">
