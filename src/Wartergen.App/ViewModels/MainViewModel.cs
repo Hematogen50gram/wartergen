@@ -123,16 +123,32 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string heightsPreviewError = string.Empty;
 
+    [ObservableProperty]
+    private bool cliffEnabled = true;
+
+    [ObservableProperty]
+    private bool waterEnabled = true;
+
+    [ObservableProperty]
+    private bool heightsEnabled = true;
+
     // WPF's Image.Opacity wants 0.0-1.0; the slider/label use 0-100 for consistency with ZoomPercent.
-    public double CliffOpacityFraction => CliffOpacityPercent / 100.0;
-    public double WaterOpacityFraction => WaterOpacityPercent / 100.0;
-    public double HeightsOpacityFraction => HeightsOpacityPercent / 100.0;
+    public double CliffOpacityFraction => CliffEnabled ? CliffOpacityPercent / 100.0 : 0.0;
+    public double WaterOpacityFraction => WaterEnabled ? WaterOpacityPercent / 100.0 : 0.0;
+    public double HeightsOpacityFraction => HeightsEnabled ? HeightsOpacityPercent / 100.0 : 0.0;
 
     partial void OnCliffOpacityPercentChanged(double value) => OnPropertyChanged(nameof(CliffOpacityFraction));
     partial void OnWaterOpacityPercentChanged(double value) => OnPropertyChanged(nameof(WaterOpacityFraction));
     partial void OnHeightsOpacityPercentChanged(double value) => OnPropertyChanged(nameof(HeightsOpacityFraction));
 
+    partial void OnCliffEnabledChanged(bool value) => OnPropertyChanged(nameof(CliffOpacityFraction));
+    partial void OnWaterEnabledChanged(bool value) => OnPropertyChanged(nameof(WaterOpacityFraction));
+    partial void OnHeightsEnabledChanged(bool value) => OnPropertyChanged(nameof(HeightsOpacityFraction));
+
     public ObservableCollection<string> LogEntries { get; } = new();
+
+    [RelayCommand]
+    private void ClearLog() => LogEntries.Clear();
 
     // Reference swatches for the cliff PNG's color encoding — constant, computed once.
     public IReadOnlyList<CliffColorLegendEntry> CliffColorLegend { get; } = CliffColorLegendBuilder.Build();
@@ -215,6 +231,16 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    private string drawTerrainStatusMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool drawTerrainSucceeded;
+
+    public Brush DrawTerrainStatusBrush => DrawTerrainSucceeded ? Brushes.LightGreen : Brushes.Tomato;
+
+    partial void OnDrawTerrainSucceededChanged(bool value) => OnPropertyChanged(nameof(DrawTerrainStatusBrush));
+
     private bool CanDrawTerrain() =>
         !IsBusy && !string.IsNullOrWhiteSpace(MapFilePath) && !string.IsNullOrWhiteSpace(BmpFilePath);
 
@@ -223,6 +249,7 @@ public partial class MainViewModel : ObservableObject
     {
         IsBusy = true;
         LogEntries.Clear();
+        DrawTerrainStatusMessage = string.Empty;
 
         var progress = new Progress<string>(message => LogEntries.Add(message));
 
@@ -232,10 +259,14 @@ public partial class MainViewModel : ObservableObject
             string? waterPngPath = string.IsNullOrWhiteSpace(WaterPngFilePath) ? null : WaterPngFilePath;
             string? heightsPngPath = string.IsNullOrWhiteSpace(HeightsPngFilePath) ? null : HeightsPngFilePath;
             await _workflow.RunAsync(MapFilePath, BmpFilePath, cliffBmpPath, waterPngPath, heightsPngPath, progress);
+            DrawTerrainSucceeded = true;
+            DrawTerrainStatusMessage = "Success!";
         }
         catch (Exception ex)
         {
             LogEntries.Add($"ERROR: {ex.Message}");
+            DrawTerrainSucceeded = false;
+            DrawTerrainStatusMessage = "Failed, see logs.";
         }
         finally
         {
