@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:Wartergen.App.ViewModels"
         xmlns:models="clr-namespace:Wartergen.App.Models"
         mc:Ignorable="d"
-        Title="Wartergen" Height="850" Width="1200" MinWidth="1200" MinHeight="850">
+        Title="Wartergen" Height="920" Width="1200" MinWidth="1200" MinHeight="920">
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
@@ -95,43 +95,49 @@
                                     <StackPanel Margin="24,0,0,0">
                                         <TextBlock Text="Cliff color codes:" FontSize="10" FontWeight="Bold" Margin="0,0,0,2" />
 
-                                        <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
-                                        <ItemsControl ItemsSource="{Binding CliffColorLegend}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
-                                                    <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
-                                                        <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
-                                           Stroke="Gray" StrokeThickness="0.5"
-                                           ToolTip="{Binding BrightHex}" />
-                                                        <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                        <StackPanel Orientation="Horizontal">
+                                            <StackPanel Margin="0,0,16,0">
+                                                <TextBlock Text="Cliff type #1 (16):" FontSize="9" Margin="0,0,0,1" />
+                                                <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                                            <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                                                <Rectangle Width="16" Height="14" Fill="{Binding BrightBrush}"
+                                                   Stroke="Gray" StrokeThickness="0.5"
+                                                   ToolTip="{Binding BrightHex}" />
+                                                                <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
 
-                                        <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,4,0,1" />
-                                        <ItemsControl ItemsSource="{Binding CliffColorLegend}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
-                                                    <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
-                                                        <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
-                                           Stroke="Gray" StrokeThickness="0.5"
-                                           ToolTip="{Binding DarkHex}" />
-                                                        <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            <StackPanel>
+                                                <TextBlock Text="Cliff type #2 (0):" FontSize="9" Margin="0,0,0,1" />
+                                                <ItemsControl ItemsSource="{Binding CliffColorLegend}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type models:CliffColorLegendEntry}">
+                                                            <StackPanel Margin="0,0,2,0" HorizontalAlignment="Center">
+                                                                <Rectangle Width="16" Height="14" Fill="{Binding DarkBrush}"
+                                                   Stroke="Gray" StrokeThickness="0.5"
+                                                   ToolTip="{Binding DarkHex}" />
+                                                                <TextBlock Text="{Binding Height}" FontSize="8" HorizontalAlignment="Center" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
 
