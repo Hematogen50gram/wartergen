@@ -18,6 +18,15 @@
             <EventSetter Event="Expanded" Handler="TreeViewItem_Expanded" />
         </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <Style x:Key="PreviewErrorTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Tomato" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=Text}" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <Style TargetType="TabItem">
             <Setter Property="Padding" Value="14,6" />
             <Setter Property="Margin" Value="0,0,2,0" />
@@ -59,7 +68,7 @@
                             <ColumnDefinition Width="12" MinWidth="12" />
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <GroupBox Grid.Row="0" Header="Preview" Padding="4" HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="300" Height="700">
+                        <GroupBox Grid.Row="0" Header="Preview" Padding="4" HorizontalAlignment="Left" VerticalAlignment="Top" MinWidth="300">
                             <StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                     <StackPanel>
@@ -127,7 +136,8 @@
                                 </StackPanel>
 
                                 <Border  Width="700" Height="700" MinWidth="700" MinHeight="700" BorderBrush="Gray" BorderThickness="1" Background="Black">
-                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                                  HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                         <Grid Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}">
                                             <Image Source="{Binding BmpPreviewSource}"
                            Width="{Binding PreviewWidth}" Height="{Binding PreviewHeight}"
@@ -167,13 +177,13 @@
                                     </ScrollViewer>
                                 </Border>
 
-                                <TextBlock Text="{Binding PreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                                <TextBlock Text="{Binding PreviewError}" Style="{StaticResource PreviewErrorTextStyle}"
                    Margin="0,8,0,0" />
-                                <TextBlock Text="{Binding CliffPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                                <TextBlock Text="{Binding CliffPreviewError}" Style="{StaticResource PreviewErrorTextStyle}"
                    Margin="0,4,0,0" />
-                                <TextBlock Text="{Binding WaterPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                                <TextBlock Text="{Binding WaterPreviewError}" Style="{StaticResource PreviewErrorTextStyle}"
                    Margin="0,4,0,0" />
-                                <TextBlock Text="{Binding HeightsPreviewError}" Foreground="Tomato" TextWrapping="Wrap"
+                                <TextBlock Text="{Binding HeightsPreviewError}" Style="{StaticResource PreviewErrorTextStyle}"
                    Margin="0,4,0,0" />
                             </StackPanel>
                         </GroupBox>
